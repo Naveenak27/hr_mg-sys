@@ -11,6 +11,7 @@ def create_app() -> FastAPI:
 
     # ✅ CORS configuration
     origins = [
+        "https://dreamy-dodol-11c484.netlify.app",
         "http://localhost:3000",      # React/Vite dev
         "http://127.0.0.1:5500",      # HTML/JS static dev
         "https://your-frontend.com",  # Your production domain (if applicable)
