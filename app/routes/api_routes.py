@@ -10,6 +10,10 @@ firebase_service = FirebaseService()
 router = APIRouter()
 data_controller = DataController()
 
+@router.get("/status")
+async def status():
+    return {"status": "ok"}
+
 # Collection Management endpoints
 @router.get("/collections", response_model=List[str])
 async def get_all_collections():
