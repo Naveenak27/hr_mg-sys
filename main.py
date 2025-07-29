@@ -4,6 +4,10 @@ from app import create_app
 
 app = create_app()
 
+@app.get("/status")
+async def status():
+    return {"status": "ok"}
+
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
