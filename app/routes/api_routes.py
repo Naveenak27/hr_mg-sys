@@ -1,5 +1,5 @@
 # app/routes/api_routes.py
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from typing import List, Optional, Dict, Any
 from app.controllers.data_controller import DataController
 from app.models.firebase_models import FirebaseDocument
@@ -11,10 +11,12 @@ router = APIRouter()
 firebase_service = FirebaseService()
 data_controller = DataController()
 
-# Status endpoint for uptime monitoring
+# Status endpoint for uptime monitoring - supports multiple HTTP methods
 @router.get("/status")
-async def get_status():
-    """Health check endpoint for uptime monitoring"""
+@router.post("/status")
+@router.head("/status")
+async def get_status(request: Request):
+    """Health check endpoint supporting multiple HTTP methods"""
     try:
         # Test database connection
         collections = data_controller.get_all_collections()
@@ -24,7 +26,8 @@ async def get_status():
             "timestamp": time.time(),
             "service": "FastAPI Firebase Service",
             "database": "connected",
-            "collections_count": len(collections) if collections else 0
+            "collections_count": len(collections) if collections else 0,
+            "method": request.method
         }
     except Exception as e:
         raise HTTPException(
@@ -34,7 +37,8 @@ async def get_status():
                 "timestamp": time.time(),
                 "service": "FastAPI Firebase Service",
                 "database": "disconnected",
-                "error": str(e)
+                "error": str(e),
+                "method": request.method
             }
         )
 
