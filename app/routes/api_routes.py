@@ -4,13 +4,39 @@ from typing import List, Optional, Dict, Any
 from app.controllers.data_controller import DataController
 from app.models.firebase_models import FirebaseDocument
 from app.services.firebase_service import FirebaseService  # Make sure this is correct
+from pydantic import BaseModel
+import time
 
 router = APIRouter()
 firebase_service = FirebaseService()
-router = APIRouter()
 data_controller = DataController()
 
-
+# Status endpoint for uptime monitoring
+@router.get("/status")
+async def get_status():
+    """Health check endpoint for uptime monitoring"""
+    try:
+        # Test database connection
+        collections = data_controller.get_all_collections()
+        
+        return {
+            "status": "healthy",
+            "timestamp": time.time(),
+            "service": "FastAPI Firebase Service",
+            "database": "connected",
+            "collections_count": len(collections) if collections else 0
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "status": "unhealthy",
+                "timestamp": time.time(),
+                "service": "FastAPI Firebase Service",
+                "database": "disconnected",
+                "error": str(e)
+            }
+        )
 
 # Collection Management endpoints
 @router.get("/collections", response_model=List[str])
@@ -295,8 +321,6 @@ async def get_reviewers():
         return data_controller.get_reviewers()
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-from fastapi import HTTPException
-from pydantic import BaseModel
 
 class LoginRequest(BaseModel):
     email: str
